@@ -24,7 +24,7 @@ from collections import defaultdict
 from tornado.options import define, options
 
 #Address of the forecasting server
-UDP_IP = "46.137.241.79"
+UDP_IP = "180.179.212.15"
 UDP_PORT = 5006
 
 class MainHandler(tornado.web.RequestHandler):
