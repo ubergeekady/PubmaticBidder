@@ -111,7 +111,7 @@ class MainHandler(tornado.web.RequestHandler):
 
         if bid == False :
 	    self.write("id="+str(random.randrange(1000000,9999999)))
-	    self.write("bid="+bidCpm)
+	    self.write("bid="+str(bidCpm))
 	else:
 	    self.write("id="+str(random.randrange(1000000,9999999)))
 	    self.write("bid="+str(bidCpm))
