@@ -15,6 +15,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpclient
 import tornado.options
+import pygeoip
 
 from pyDes import *
 from urlparse import urlparse
@@ -29,104 +30,95 @@ UDP_PORT = 5006
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
 	global campaignData
-	global bidCountIndex      
+	global bidCountIndex     
+	global gi4
         start = time.time()
-        postContent = self.request.body
-        bidRequest = ssrtb_pb2.BidRequest()
+        
+        adHeight= self.get_argument('adHeight', True)
+        requestId= self.get_argument('requestId', True)        
+        adWidth=self.get_argument('adWidth',True)
+        ip=self.get_argument('ip',True)
+        
+        bid = False
+        bidCpm = 0
+        code = ""
+        
+	domain = re.sub('www.',r'',str(self.get_argument('pageurl',True).netloc))
+	country = gi4.country_code_by_addr(ip).lower()
 
-        bid = True
-        bidMicros=0
-        code=""
-        try:
-            bidRequest.ParseFromString(postContent)
-            ad = bidRequest.matching_ad_ids
-            ad=ad[0]
-            domain = re.sub('www.',r'',str(urlparse(bidRequest.url).netloc))
-            country = bidRequest.user_geo_country.lower()
+	try:
+	  ronCampaigns = campaignData['display:roe']
+	except KeyError:
+	  ronCampaigns = list()
+	try:
+	  black = campaignData['display:roe:black:'+domain]
+	except KeyError:
+	  black = list()
 
-            try:
-	      ronCampaigns = campaignData['display:roe']
-	    except KeyError:
-	      ronCampaigns = list()
-	    try:
-	      black = campaignData['display:roe:black:'+domain]
-	    except KeyError:
-	      black = list()
+	ronCampaigns = list(set(ronCampaigns) - set(black))			
 
-	    ronCampaigns = list(set(ronCampaigns) - set(black))			
+	try:
+	  whiteCampaigns = campaignData['display:white:'+domain]
+	except KeyError:
+	  whiteCampaigns = list()
 
-	    try:
-	      whiteCampaigns = campaignData['display:white:'+domain]
-	    except KeyError:
-	      whiteCampaigns = list()
+	campaigns = list(set(ronCampaigns+whiteCampaigns))
 
-	    campaigns = list(set(ronCampaigns+whiteCampaigns))
+	try:
+	  geoCampaigns = campaignData['display:geo:'+country]
+	except KeyError:
+	  geoCampaigns = list()
+	  
+	campaigns = list(set(geoCampaigns) & set(campaigns))
 
-	    try:
-	      geoCampaigns = campaignData['display:geo:'+country]
-	    except KeyError:
-	      geoCampaigns = list()
+	size=str(adWidth)+"x"+str(adHeight)
+	try:
+	  sizeCampaigns = campaignData['display:size:'+size]
+	except KeyError:
+	  sizeCampaigns = list()
+	  
+	campaigns = list(set(sizeCampaigns) & set(campaigns))
+
+	if(len(campaigns)>0):
+	  camplist=[]
+	  for camp in campaigns:
+	      l = [camp, campaignData["display:campaign:"+str(camp)+":bid"],campaignData["display:campaign:"+str(camp)+":pacing"]]
+	      camplist.append(l)
 	      
-	    campaigns = list(set(geoCampaigns) & set(campaigns))
-
-	    size=str(bidRequest.ad_width)+"x"+str(bidRequest.ad_height)
-	    try:
-	      sizeCampaigns = campaignData['display:size:'+size]
-	    except KeyError:
-	      sizeCampaigns = list()
-	      
-	    campaigns = list(set(sizeCampaigns) & set(campaigns))
-
-	    if(len(campaigns)>0):
-	      camplist=[]
-	      for camp in campaigns:
-		  l = [camp, campaignData["display:campaign:"+str(camp)+":bid"],campaignData["display:campaign:"+str(camp)+":pacing"]]
-		  camplist.append(l)
+	  camplist.sort(key=operator.itemgetter(1), reverse=True) # sorts the list in place decending by bids
+	  
+	  finalCampaign=0
+	  for camp in camplist:
+	      r=random.randrange(1,100)
+	      if r<camp[2]:
+		  finalCampaign=camp[0]
+		  finalBid=camp[1]
+		  break
 		  
-	      camplist.sort(key=operator.itemgetter(1), reverse=True) # sorts the list in place decending by bids
-	      
-	      finalCampaign=0
-	      for camp in camplist:
-		  r=random.randrange(1,100)
-		  if r<camp[2]:
-		      finalCampaign=camp[0]
-		      finalBid=camp[1]
-		      break
-		      
-	      if finalCampaign>0:
-		  banners = campaignData['display:campaign:'+str(finalCampaign)+':'+str(bidRequest.ad_width)+'x'+str(bidRequest.ad_height)]
-		  randomBannerId = random.choice(banners)
-		  bidMicros = finalBid * 1000000
-		  info = base64.b64encode(json.dumps({'e':'openx','d':domain,'bid':randomBannerId,'cid':finalCampaign, 'b':finalBid, "s":bidRequest.user_geo_state,"country":country}))
-		  info = info.replace("+","-").replace("/","_").replace("=","")
-		  code='<iframe src="http://rtbidder.impulse01.com/serve?info='+info+'&p={WINNING_PRICE}&r={RANDOM}&red=" width="'+str(bidRequest.ad_width)+'" height="'+str(bidRequest.ad_height)+'" frameborder=0 marginwidth=0 marginheight=0 scrolling=NO></iframe>'
-		  
-        except:
-            bid = False
-            error = True
-            print  sys.exc_info()
+	  if finalCampaign>0:
+	      bid = True
+	      banners = campaignData['display:campaign:'+str(finalCampaign)+':'+str(adWidth)+'x'+str(adHeight)]
+	      randomBannerId = random.choice(banners)
+	      landingPageURL = campaignData['display:campaign:'+str(finalCampaign)+':url']
+	      buyerId=campaignData['display:campaign:'+str(finalCampaign)+':advertiserId']
+	      bidCpm = finalBid
+	      info = base64.b64encode(json.dumps({'e':'pubmatic','d':domain,'bid':randomBannerId,'cid':finalCampaign, 'b':finalBid,"country":country}))
+	      info = info.replace("+","-").replace("/","_").replace("=","")
+	      code="http://rtbidder.impulse01.com/serve?info='+info+'&p={PUBMATIC_SECOND_PRICE}&r={RANDOM}&red="
 
         if bid == False :
-            bidMicros = 0
-            code = ""
-            
-        print bidMicros
-        print code
-        print domain
-        
-        response = ssrtb_pb2.BidResponse()
-        response.api_version = bidRequest.api_version
-        response.auction_id = bidRequest.auction_id
-        responseBid = response.bids.add()
-        responseBid.matching_ad_id.campaign_id = int(ad.campaign_id)
-        responseBid.matching_ad_id.placement_id = int(ad.placement_id)
-        responseBid.matching_ad_id.creative_id = int(ad.creative_id)
-        responseBid.cpm_bid_micros = int(bidMicros)
-        responseBid.ad_code = code
-
-        responseString = response.SerializeToString()
-
-        self.write(responseString)
+	    self.write("id="+str(random.randRange(1000000,9999999));
+	    self.write("bid="+bidCpm)
+	else:
+	    self.write("id="+str(random.randRange(1000000,9999999));
+	    self.write("bid="+bidCpm)
+	    self.write("buyer="+buyerId)
+	    self.write("creativeId="+randomBannerId)
+	    self.write("creativeHTMLURL="+code)
+	    self.write("landingPageURL="+landingPageURL)
+	    self.write("landingPageTLD="+re.sub('www.',r'',str(landingPageURL.netloc)))	    
+	    self.write("requestId="+requestId)
+	
         timeTaken = time.time() - start
 
 def autovivify(levels=1, final=dict):
@@ -155,6 +147,7 @@ define("refreshCache", default=10000, help="millisecond interval between cache r
 #sredisClient = tornadoredis.Client('cookie-tokyo.impulse01.com')
 #redisClient.connect()
 application = tornado.web.Application([(r".*", MainHandler),])
+gi4 = pygeoip.GeoIP('/home/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
 #-----------------------------------------------------------------------------------------------
 
 
