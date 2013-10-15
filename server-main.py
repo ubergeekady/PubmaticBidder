@@ -40,7 +40,7 @@ class MainHandler(tornado.web.RequestHandler):
         ip=self.get_argument('ip',True)
         pageurl=self.get_argument('pageurl',True)
         
-        print pageurl
+        self.add_header("Content-Type", "text/plain")
         
         bid = False
         bidCpm = 0
