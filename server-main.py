@@ -46,7 +46,7 @@ class MainHandler(tornado.web.RequestHandler):
         bidCpm = 0
         code = ""
         
-	domain = re.sub('www.',r'',str(pageurl.netloc))
+	domain = re.sub('www.',r'',str(urlparse(pageurl).netloc))
 	country = gi4.country_code_by_addr(ip).lower()
 
 	try:
