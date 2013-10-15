@@ -133,7 +133,8 @@ class MainHandler(tornado.web.RequestHandler):
 	  bidCountIndex["Pubmatic"][domain]["DesktopDisplay"][country.upper()][str(adWidth)+'x'+str(adHeight)]["Lastupdate"]=time.time()
 	  sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 	  sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-	  sock.sendto(message, (UDP_IP, UDP_PORT))        
+	  sock.sendto(message, (UDP_IP, UDP_PORT))
+	  print "\n\n\nInventory Forecast Transmitted\n\n\n"
 
 def autovivify(levels=1, final=dict):
     return (defaultdict(final) if levels < 2 else defaultdict(lambda: autovivify(levels - 1, final)))
