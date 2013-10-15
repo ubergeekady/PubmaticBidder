@@ -107,10 +107,10 @@ class MainHandler(tornado.web.RequestHandler):
 	      code="http://rtbidder.impulse01.com/serve?info='+info+'&p={PUBMATIC_SECOND_PRICE}&r={RANDOM}&red="
 
         if bid == False :
-	    self.write("id="+str(random.randRange(1000000,9999999));
+	    self.write("id="+str(random.randRange(1000000,9999999)))
 	    self.write("bid="+bidCpm)
 	else:
-	    self.write("id="+str(random.randRange(1000000,9999999));
+	    self.write("id="+str(random.randRange(1000000,9999999)))
 	    self.write("bid="+bidCpm)
 	    self.write("buyer="+buyerId)
 	    self.write("creativeId="+randomBannerId)
