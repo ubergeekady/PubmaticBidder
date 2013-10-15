@@ -114,12 +114,12 @@ class MainHandler(tornado.web.RequestHandler):
 	    self.write("bid="+bidCpm)
 	else:
 	    self.write("id="+str(random.randrange(1000000,9999999)))
-	    self.write("bid="+bidCpm)
-	    self.write("buyer="+buyerId)
-	    self.write("creativeId="+randomBannerId)
+	    self.write("bid="+str(bidCpm))
+	    self.write("buyer="+str(buyerId))
+	    self.write("creativeId="+str(randomBannerId))
 	    self.write("creativeHTMLURL="+code)
 	    self.write("landingPageURL="+landingPageURL)
-	    self.write("landingPageTLD="+re.sub('www.',r'',str(landingPageURL.netloc)))	    
+	    self.write("landingPageTLD="+re.sub('www.',r'',str(urlparse(landingPageURL).netloc)))	    
 	    self.write("requestId="+requestId)
 	
         timeTaken = time.time() - start
