@@ -110,17 +110,17 @@ class MainHandler(tornado.web.RequestHandler):
 	      code="http://rtbidder.impulse01.com/serve?info="+info+"&p={PUBMATIC_SECOND_PRICE}&r={RANDOM}&red="
 
         if bid == False :
-	    self.write("id="+str(random.randrange(1000000,9999999)))
-	    self.write("bid="+str(bidCpm))
+	    self.write("id="+str(random.randrange(1000000,9999999))+"\n")
+	    self.write("bid="+str(bidCpm)+"\n")
 	else:
-	    self.write("id="+str(random.randrange(1000000,9999999)))
-	    self.write("bid="+str(bidCpm))
-	    self.write("buyer="+str(buyerId))
-	    self.write("creativeId="+str(randomBannerId))
-	    self.write("creativeHTMLURL="+code)
-	    self.write("landingPageURL="+landingPageURL)
-	    self.write("landingPageTLD="+re.sub('www.',r'',str(urlparse(landingPageURL).netloc)))	    
-	    self.write("requestId="+requestId)
+	    self.write("id="+str(random.randrange(1000000,9999999))+"\n")
+	    self.write("bid="+str(bidCpm)+"\n")
+	    self.write("buyer="+str(buyerId)+"\n")
+	    self.write("creativeId="+str(randomBannerId)+"\n")
+	    self.write("creativeHTMLURL="+code+"\n")
+	    self.write("landingPageURL="+landingPageURL+"\n")
+	    self.write("landingPageTLD="+re.sub('www.',r'',str(urlparse(landingPageURL).netloc))+"\n")
+	    self.write("requestId="+requestId+"\n")
 	
         timeTaken = time.time() - start
 
