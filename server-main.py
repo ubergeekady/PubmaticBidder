@@ -38,12 +38,15 @@ class MainHandler(tornado.web.RequestHandler):
         requestId= self.get_argument('requestId', True)        
         adWidth=self.get_argument('adWidth',True)
         ip=self.get_argument('ip',True)
+        pageurl=self.get_argument('pageurl',True)
+        
+        print pageurl
         
         bid = False
         bidCpm = 0
         code = ""
         
-	domain = re.sub('www.',r'',str(self.get_argument('pageurl',True).netloc))
+	domain = re.sub('www.',r'',str(pageurl.netloc))
 	country = gi4.country_code_by_addr(ip).lower()
 
 	try:
