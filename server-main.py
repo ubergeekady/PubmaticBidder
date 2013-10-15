@@ -125,9 +125,9 @@ class MainHandler(tornado.web.RequestHandler):
         timeTaken = time.time() - start
 
 	bidCountIndex["Pubmatic"][domain]["DesktopDisplay"][country.upper()][str(adWidth)+'x'+str(adHeight)]["Impressions"] += 1
-	if int(time.time() - bidCountIndex["GoogleAdX"][domain]["DesktopDisplay"][country.upper()][str(adWidth)+'x'+str(adHeight)]["Lastupdate"])>120:
+	if int(time.time() - bidCountIndex["Pubmatic"][domain]["DesktopDisplay"][country.upper()][str(adWidth)+'x'+str(adHeight)]["Lastupdate"])>120:
 	  i = bidCountIndex["Pubmatic"][domain]["DesktopDisplay"][country.upper()][str(adWidth)+'x'+str(adHeight)]["Impressions"]
-	  message = json.dumps({"messageType":"Forecast", "message":{"e":"GoogleAdX", "d":domain , "c":"DesktopDisplay" ,"geo":country.upper(),
+	  message = json.dumps({"messageType":"Forecast", "message":{"e":"Pubmatic", "d":domain , "c":"DesktopDisplay" ,"geo":country.upper(),
 				  "size":str(adWidth)+'x'+str(adHeight) , "i":i}})
 	  bidCountIndex["Pubmatic"][domain]["DesktopDisplay"][country.upper()][str(adWidth)+'x'+str(adHeight)]["Impressions"]=0
 	  bidCountIndex["Pubmatic"][domain]["DesktopDisplay"][country.upper()][str(adWidth)+'x'+str(adHeight)]["Lastupdate"]=time.time()
