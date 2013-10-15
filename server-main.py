@@ -107,7 +107,7 @@ class MainHandler(tornado.web.RequestHandler):
 	      bidCpm = finalBid
 	      info = base64.b64encode(json.dumps({'e':'pubmatic','d':domain,'bid':randomBannerId,'cid':finalCampaign, 'b':finalBid,"country":country}))
 	      info = info.replace("+","-").replace("/","_").replace("=","")
-	      code="http://rtbidder.impulse01.com/serve?info="+info+"&p={PUBMATIC_SECOND_PRICE}&r=1&red="
+	      code="http://rtbidder.impulse01.com/serve?info="+info+"&p={PUBMATIC_SECOND_PRICE}&r=#PCACHEBUSTER&red="
 
         if bid == False :
 	    self.write("requestId="+requestId+"\n")
