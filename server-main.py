@@ -134,7 +134,7 @@ class MainHandler(tornado.web.RequestHandler):
 	  sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 	  sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 	  sock.sendto(message, (UDP_IP, UDP_PORT))
-	  print "\n\n\nInventory Forecast Transmitted\n\n\n"
+	  print "\n\n\nInventory Forecast Transmitted\n"+message+"\n\n"
 
 def autovivify(levels=1, final=dict):
     return (defaultdict(final) if levels < 2 else defaultdict(lambda: autovivify(levels - 1, final)))
