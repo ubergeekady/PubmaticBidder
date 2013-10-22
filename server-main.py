@@ -16,6 +16,7 @@ import tornado.web
 import tornado.httpclient
 import tornado.options
 import pygeoip
+import urllib
 
 from pyDes import *
 from urlparse import urlparse
@@ -46,7 +47,7 @@ class MainHandler(tornado.web.RequestHandler):
         bidCpm = 0
         code = ""
         
-	domain = re.sub('www.',r'',str(urlparse(pageurl).netloc))
+	domain = re.sub('www.',r'',str(urlparse(urllib.unquote(pageurl)).netloc))
 	country = gi4.country_code_by_addr(ip).lower()
 
 	try:
