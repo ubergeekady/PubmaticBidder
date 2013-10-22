@@ -47,10 +47,13 @@ class MainHandler(tornado.web.RequestHandler):
         bidCpm = 0
         code = ""
         
-	print pageurl
-	domain = re.sub('www.',r'',str(urlparse(urllib.unquote(pageurl)).netloc))
+	try:
+	  domain = re.sub('www.',r'',str(urlparse(urllib.unquote(pageurl)).netloc))
+	except:
+	  print "parse exception"
+
 	country = gi4.country_code_by_addr(ip).lower()
-	print domain
+
 	try:
 	  ronCampaigns = campaignData['display:roe']
 	except KeyError:
